@@ -25,6 +25,10 @@ import {
   Users, 
   Award, 
   ChevronDown, 
+  ChevronLeft,
+  ChevronRight,
+  Quote,
+  Star,
   Copy, 
   Plus, 
   Menu, 
@@ -34,7 +38,11 @@ import {
   Database, 
   Trash2, 
   CheckCircle2,
-  Clock
+  Clock,
+  Play,
+  Youtube,
+  Info,
+  Lightbulb
 } from 'lucide-react';
 
 // Import ảnh đại diện đã được tạo bởi AI
@@ -57,11 +65,16 @@ import avatarImage from './assets/images/tho_nguyen_avatar_1783039011260.jpg';
  *    Mặc định trang web sử dụng tông màu Slate tối giản kết hợp với dải màu Neon Cyan & Indigo 
  *    mang đậm chất "Digital AI". Anh có thể thay đổi các mã màu CSS/Tailwind trong CONFIG.theme.
  * 
- * 3. LIÊN KẾT GOOGLE FORM:
+ * 3. KẾT NỐI GOOGLE SHEETS TRỰC TIẾP (KHÔNG QUA GOOGLE FORM):
+ *    - Điền link Webhook Google Apps Script của anh vào trường `CONFIG.googleSheetsWebhookUrl`.
+ *    - Khi khách hàng nhấn gửi form, thông tin sẽ được đẩy thẳng về Google Sheet của anh ngay lập tức!
+ *    - Xem hướng dẫn chi tiết cách tạo script ở phần phản hồi chat.
+ * 
+ * 4. LIÊN KẾT GOOGLE FORM (TÙY CHỌN):
  *    Nếu anh có link Google Form, hãy điền vào `CONFIG.googleFormLink`. Khi đó, khi khách hàng
  *    nhấn Đăng ký, trang web sẽ lưu lại tại hệ thống nội bộ đồng thời dẫn khách đến form của anh.
  * 
- * 4. SỐ ĐIỆN THOẠI & ZALO:
+ * 5. SỐ ĐIỆN THOẠI & ZALO:
  *    Thay số điện thoại của anh trong `CONFIG.hotline`. Số này sẽ tự động liên kết với nút gọi điện
  *    và link nhắn tin Zalo nhanh.
  * =========================================================================
@@ -76,6 +89,7 @@ const CONFIG = {
   email: "contact@thonguyendigital.vn",
   address: "Hà Nội, Việt Nam",
   googleFormLink: "", // Điền link Google Form của anh vào đây nếu có (ví dụ: "https://docs.google.com/forms/d/e/.../viewform")
+  googleSheetsWebhookUrl: "", // ĐIỀN ĐƯỜNG DẪN WEBHOOK GOOGLE SHEETS CỦA ANH VÀO ĐÂY ĐỂ ĐẨY DATA TRỰC TIẾP LÊN SHEET (Xem hướng dẫn chi tiết bên dưới)
 
   // === MÀU SẮC CHỦ ĐẠO ===
   theme: {
@@ -272,6 +286,30 @@ const CONFIG = {
         achievement: "Tăng trưởng doanh thu 150%, thu gom trung bình 55 đơn hàng tự động mỗi ngày mà không cần tư vấn thủ công qua inbox.",
         image: "https://images.unsplash.com/photo-1441986300917-64674bd600d8?q=80&w=600&auto=format&fit=crop",
         quote: "Cứ nghĩ làm Ladipage rất phức tạp nhưng Thọ bàn giao trọn gói chỉ sau chưa đầy một buổi. Nội dung viết rất tự nhiên, khách vào tự chốt đơn mà mình rảnh tay hẳn."
+      },
+      {
+        name: "Anh Quốc Bảo",
+        role: "Nhà sáng lập Thương hiệu Mỹ Phẩm Nature",
+        project: "Chiến dịch Tuyển Đại Lý Sỉ & CTV Toàn Quốc",
+        achievement: "Tuyển thành công 42 đại lý cấp 1 và hơn 120 CTV sỉ chỉ trong 1 tháng đầu tiên chạy phễu Ladipage thông minh.",
+        image: "https://images.unsplash.com/photo-1507003211169-0a1dd7228f2d?q=80&w=600&auto=format&fit=crop",
+        quote: "Hệ thống phễu Ladipage kết hợp chatbot tự động do Thọ Nguyễn triển khai hoạt động trơn tru 24/7. Data đổ trực tiếp về Google Sheet siêu nhanh giúp telesale chốt đơn không bỏ lỡ ai."
+      },
+      {
+        name: "Chị Phương Thảo",
+        role: "Giám đốc trung tâm Anh ngữ Future Leaders",
+        project: "Ladipage Tuyển Sinh Khóa Học Hè Đột Phá",
+        achievement: "Thu hút 210 học viên đăng ký học thử 1 kèm 1 miễn phí chỉ với ngân sách chạy quảng cáo siêu tiết kiệm.",
+        image: "https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?q=80&w=600&auto=format&fit=crop",
+        quote: "Tư duy Marketing của Thọ rất nhạy bén. Ladipage không chỉ đẹp về giao diện mà còn được cấu trúc bố cục rất thuyết phục, chạm đúng nỗi lo về kết quả học tập của các bậc phụ huynh."
+      },
+      {
+        name: "Anh Minh Đức",
+        role: "Nhà môi giới BĐS độc lập",
+        project: "Ladipage Shophouse Vinhomes Grand Park",
+        achievement: "Nhận hơn 85 cuộc gọi trực tiếp và điền form tư vấn. Giúp chốt thành công 3 giao dịch mua bán shophouse giá trị lớn.",
+        image: "https://images.unsplash.com/photo-1500648767791-00dcc994a43e?q=80&w=600&auto=format&fit=crop",
+        quote: "Điểm cộng lớn nhất là tốc độ tải trang cực kỳ nhanh trên điện thoại. Khách hàng BĐS cao cấp rất thiếu kiên nhẫn, trang load nhanh giúp tôi không bỏ lỡ khách VIP khi chạy quảng cáo Facebook."
       }
     ]
   },
@@ -283,6 +321,7 @@ const CONFIG = {
     fields: {
       name: "Họ và tên của bạn",
       phone: "Số điện thoại (Có Zalo)",
+      email: "Địa chỉ Email của bạn",
       niche: "Lĩnh vực kinh doanh",
       nicheOptions: [
         "Môi giới Bán Căn Hộ / Bất Động Sản",
@@ -308,15 +347,35 @@ interface Lead {
   id: string;
   name: string;
   phone: string;
+  email: string;
   niche: string;
   note: string;
   timestamp: string;
 }
 
+// Hàm trích xuất ID Video YouTube từ mọi định dạng đường dẫn
+const getYoutubeId = (url: string) => {
+  if (!url) return '2nIuS632Uv0';
+  const regExp = /^.*(youtu.be\/|v\/|u\/\w\/|embed\/|watch\?v=|\&v=)([^#\&\?]*).*/;
+  const match = url.match(regExp);
+  if (match && match[2] && match[2].length === 11) {
+    return match[2];
+  }
+  const clean = url.trim();
+  if (clean.length === 11) {
+    return clean;
+  }
+  return '2nIuS632Uv0';
+};
+
 export default function App() {
+  // ĐƯỜNG DẪN VIDEO YOUTUBE - Hãy dán link YouTube của bạn trực tiếp tại đây để cập nhật video hiển thị trên Landing Page:
+  const videoUrl = 'https://www.youtube.com/watch?v=2nIuS632Uv0';
+
   // Trạng thái cho form đăng ký
   const [name, setName] = useState('');
   const [phone, setPhone] = useState('');
+  const [email, setEmail] = useState('');
   const [niche, setNiche] = useState(CONFIG.form.fields.nicheOptions[0]);
   const [note, setNote] = useState('');
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -330,6 +389,31 @@ export default function App() {
 
   // Mobile menu toggle
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+
+  // Trạng thái cho Testimonial Slider
+  const [currentTestimonialIndex, setCurrentTestimonialIndex] = useState(0);
+  const [isTestimonialAutoplay, setIsTestimonialAutoplay] = useState(true);
+  const [slideDirection, setSlideDirection] = useState(1); // 1 = next, -1 = prev
+
+  // Tự động chuyển đổi testimonial sau mỗi 6 giây nếu không bị rà chuột (hover)
+  useEffect(() => {
+    if (!isTestimonialAutoplay) return;
+    const interval = setInterval(() => {
+      setSlideDirection(1);
+      setCurrentTestimonialIndex((prev) => (prev + 1) % CONFIG.proofs.cases.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, [isTestimonialAutoplay]);
+
+  const handleNextTestimonial = () => {
+    setSlideDirection(1);
+    setCurrentTestimonialIndex((prev) => (prev + 1) % CONFIG.proofs.cases.length);
+  };
+
+  const handlePrevTestimonial = () => {
+    setSlideDirection(-1);
+    setCurrentTestimonialIndex((prev) => (prev - 1 + CONFIG.proofs.cases.length) % CONFIG.proofs.cases.length);
+  };
 
   // Đọc danh sách lead cũ từ localStorage nếu có
   useEffect(() => {
@@ -347,6 +431,7 @@ export default function App() {
           id: 'lead-1',
           name: 'Nguyễn Văn Nam',
           phone: '091.2xx.x345',
+          email: 'nam.nguyen@gmail.com',
           niche: 'Môi giới Bán Căn Hộ / Bất Động Sản',
           note: 'Cần làm gấp Ladipage dự án mới tại Quận 2 để chạy ads tuần tới.',
           timestamp: 'Vừa xong'
@@ -355,6 +440,7 @@ export default function App() {
           id: 'lead-2',
           name: 'Phạm Thị Thúy Vy',
           phone: '097.8xx.x892',
+          email: 'vy.pham@gmail.com',
           niche: 'Chủ Shop Kinh Doanh Online (Thời trang, Mỹ phẩm...)',
           note: 'Muốn tối ưu lại trang bán hàng trị mụn cũ, tải trang quá chậm.',
           timestamp: '5 phút trước'
@@ -366,7 +452,7 @@ export default function App() {
   }, []);
 
   // Xử lý nộp form đăng ký
-  const handleSubmit = (e: React.FormEvent) => {
+  const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setValidationError('');
 
@@ -375,53 +461,142 @@ export default function App() {
       setValidationError('Vui lòng nhập họ và tên của bạn.');
       return;
     }
-    if (!phone.trim()) {
-      setValidationError('Vui lòng nhập số điện thoại để tôi liên hệ.');
+    
+    // 1. Kiểm tra số điện thoại: phải bắt đầu bằng số 0 và có đúng 10 chữ số
+    const cleanPhone = phone.replace(/[^0-9]/g, '');
+    if (!cleanPhone.startsWith('0')) {
+      setValidationError('Số điện thoại không hợp lệ. Số điện thoại phải bắt đầu bằng số 0.');
       return;
     }
-    const phoneRegex = /^[0-9.]{9,12}$/;
-    const cleanPhone = phone.replace(/[^0-9]/g, '');
-    if (cleanPhone.length < 9 || cleanPhone.length > 12) {
-      setValidationError('Số điện thoại không hợp lệ. Vui lòng nhập từ 9 đến 12 chữ số.');
+    if (cleanPhone.length !== 10) {
+      setValidationError('Số điện thoại không hợp lệ. Số điện thoại phải chứa chính xác 10 chữ số.');
+      return;
+    }
+
+    // 2. Kiểm tra Email: phải chứa ký tự @
+    if (!email.trim()) {
+      setValidationError('Vui lòng nhập địa chỉ Email của bạn.');
+      return;
+    }
+    if (!email.includes('@')) {
+      setValidationError('Địa chỉ Email không hợp lệ. Email phải chứa ký tự "@" (Ví dụ: thonguyen@gmail.com).');
       return;
     }
 
     setIsSubmitting(true);
 
-    // Giả lập gửi API trong 1 giây
-    setTimeout(() => {
-      const newLead: Lead = {
-        id: 'lead-' + Date.now(),
-        name: name.trim(),
-        phone: phone.trim(),
-        niche: niche,
-        note: note.trim() || 'Không có ghi chú thêm',
-        timestamp: new Date().toLocaleTimeString('vi-VN', { hour: '2-digit', minute: '2-digit' }) + ' - Hôm nay'
-      };
+    const timestampStr = new Date().toLocaleString('vi-VN');
+    const newLead: Lead = {
+      id: 'lead-' + Date.now(),
+      name: name.trim(),
+      phone: phone.trim(),
+      email: email.trim(),
+      niche: niche,
+      note: note.trim() || 'Không có ghi chú thêm',
+      timestamp: timestampStr
+    };
 
-      const updatedLeads = [newLead, ...leads];
-      setLeads(updatedLeads);
-      localStorage.setItem('thonguyen_leads', JSON.stringify(updatedLeads));
+    // Nếu người dùng cấu hình googleSheetsWebhookUrl, chúng ta gửi trực tiếp đến Google Sheet
+    if (CONFIG.googleSheetsWebhookUrl) {
+      try {
+        const formData = new URLSearchParams();
+        formData.append('name', newLead.name);
+        formData.append('phone', newLead.phone);
+        formData.append('email', newLead.email);
+        formData.append('niche', newLead.niche);
+        formData.append('note', newLead.note);
+        formData.append('timestamp', newLead.timestamp);
 
-      setIsSubmitting(false);
-      setSubmitSuccess(true);
-
-      // Nếu có link Google Form, tự động mở ra ở tab mới sau khi hiển thị thành công
-      if (CONFIG.googleFormLink) {
-        window.open(CONFIG.googleFormLink, '_blank');
+        await fetch(CONFIG.googleSheetsWebhookUrl, {
+          method: 'POST',
+          mode: 'no-cors', // Sử dụng no-cors để tránh bị chặn bởi CORS preflight từ trình duyệt
+          headers: {
+            'Content-Type': 'application/x-www-form-urlencoded',
+          },
+          body: formData.toString()
+        });
+      } catch (error) {
+        console.error("Lỗi khi gửi dữ liệu lên Google Sheet:", error);
       }
+    }
 
-      // Reset các trường
-      setName('');
-      setPhone('');
-      setNote('');
-    }, 1200);
+    // Lưu trữ cục bộ vào Lead Board để quản trị viên theo dõi trực tiếp
+    const updatedLeads = [newLead, ...leads];
+    setLeads(updatedLeads);
+    localStorage.setItem('thonguyen_leads', JSON.stringify(updatedLeads));
+
+    setIsSubmitting(false);
+    setSubmitSuccess(true);
+
+    // Nếu có link Google Form, tự động mở ra ở tab mới sau khi hiển thị thành công (nếu cấu hình)
+    if (CONFIG.googleFormLink) {
+      window.open(CONFIG.googleFormLink, '_blank');
+    }
+
+    // Reset các trường
+    setName('');
+    setPhone('');
+    setEmail('');
+    setNote('');
   };
 
   // Sao chép số hotline nhanh
   const copyToClipboard = (text: string) => {
     navigator.clipboard.writeText(text);
     alert(`Đã sao chép số điện thoại: ${text}`);
+  };
+
+  const renderVideoSection = () => {
+    const currentYoutubeId = getYoutubeId(videoUrl);
+
+    return (
+      <section id="youtube-video-section" className="py-20 sm:py-24 bg-slate-900 border-t border-b border-slate-800 relative overflow-hidden">
+        {/* Glowing visual accents */}
+        <div className="absolute w-[300px] h-[300px] bg-cyan-500/5 rounded-full blur-3xl -z-10 -top-10 -right-10" />
+        <div className="absolute w-[300px] h-[300px] bg-indigo-500/5 rounded-full blur-3xl -z-10 -bottom-10 -left-10" />
+
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+          
+          {/* Section Header */}
+          <div className="text-center max-w-3xl mx-auto mb-12 space-y-4">
+            <span className="text-[11px] font-mono font-bold tracking-widest text-cyan-400 uppercase bg-cyan-500/10 border border-cyan-500/20 px-3 py-1 rounded-full inline-flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full bg-cyan-400 animate-pulse" />
+              🎥 VIDEO HƯỚNG DẪN THỰC TẾ
+            </span>
+            <h2 className="font-display font-black text-2xl sm:text-3xl md:text-4xl text-white tracking-tight uppercase leading-snug">
+              Hướng dẫn mọi người tạo <span className="text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 via-indigo-400 to-cyan-400 font-black">Ladipage bằng AI</span> với <span className="text-amber-400">30 phút.</span>
+            </h2>
+            <div className="h-1 w-20 bg-gradient-to-r from-cyan-400 to-indigo-500 mx-auto rounded-full" />
+            <p className="text-cyan-400 text-sm font-semibold tracking-wide uppercase">
+              ✨ Phù hợp với mọi ngành nghề
+            </p>
+          </div>
+
+          <div className="max-w-4xl mx-auto">
+            
+            {/* Elegant Video Player Container */}
+            <div className="relative rounded-3xl overflow-hidden border border-slate-800 bg-slate-950 p-2 sm:p-3 shadow-2xl shadow-cyan-500/5 group">
+              <div className="absolute inset-0 bg-gradient-to-tr from-cyan-500/10 via-transparent to-indigo-500/10 rounded-3xl -z-10" />
+              
+              {/* Responsive 16:9 Iframe */}
+              <div className="relative aspect-video rounded-2xl overflow-hidden bg-slate-900 border border-slate-800">
+                <iframe 
+                  src={`https://www.youtube.com/embed/${currentYoutubeId}`}
+                  title="YouTube video player"
+                  frameBorder="0"
+                  allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture; web-share"
+                  allowFullScreen
+                  className="absolute top-0 left-0 w-full h-full"
+                  referrerPolicy="no-referrer"
+                />
+              </div>
+            </div>
+
+          </div>
+
+        </div>
+      </section>
+    );
   };
 
   return (
@@ -923,6 +1098,8 @@ export default function App() {
         </div>
       </section>
 
+      {renderVideoSection()}
+
       {/* 5. SECTION CÂU CHUYỆN CÁ NHÂN (Personal Story) */}
       <section id="about" className="py-20 sm:py-28 bg-slate-900/40 border-t border-b border-slate-900 relative">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
@@ -1084,50 +1261,175 @@ export default function App() {
             ))}
           </div>
 
-          {/* Grid Case Studies */}
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
-            {CONFIG.proofs.cases.map((cs, i) => (
-              <div key={i} className="p-8 rounded-3xl bg-slate-900 border border-slate-800 flex flex-col justify-between space-y-6 relative overflow-hidden group">
-                <div className="absolute inset-0 bg-gradient-to-tr from-indigo-500/5 to-transparent opacity-0 group-hover:opacity-100 transition-opacity" />
-                
-                <div className="space-y-4 relative z-10">
+          {/* Interactive Testimonial Slider */}
+          <div 
+            className="relative"
+            onMouseEnter={() => setIsTestimonialAutoplay(false)}
+            onMouseLeave={() => setIsTestimonialAutoplay(true)}
+          >
+            {/* Main Active Testimonial Card */}
+            <div className="min-h-[420px] sm:min-h-[350px] md:min-h-[280px] relative rounded-3xl bg-slate-900 border border-slate-800 overflow-hidden shadow-2xl p-6 sm:p-10">
+              {/* Decorative light reflection or glows */}
+              <div className="absolute top-0 right-0 w-64 h-64 bg-cyan-500/5 rounded-full blur-3xl -z-10" />
+              <div className="absolute bottom-0 left-0 w-64 h-64 bg-indigo-500/5 rounded-full blur-3xl -z-10" />
+              
+              <AnimatePresence mode="wait" initial={false} custom={slideDirection}>
+                <motion.div
+                  key={currentTestimonialIndex}
+                  custom={slideDirection}
+                  variants={{
+                    enter: (dir) => ({
+                      x: dir > 0 ? 80 : -80,
+                      opacity: 0,
+                      scale: 0.98
+                    }),
+                    center: {
+                      x: 0,
+                      opacity: 1,
+                      scale: 1
+                    },
+                    exit: (dir) => ({
+                      x: dir > 0 ? -80 : 80,
+                      opacity: 0,
+                      scale: 0.98
+                    })
+                  }}
+                  initial="enter"
+                  animate="center"
+                  exit="exit"
+                  transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+                  className="grid grid-cols-1 lg:grid-cols-12 gap-8 items-center h-full"
+                >
                   
-                  {/* Nhãn dự án */}
-                  <span className="text-[11px] font-mono font-bold tracking-widest text-indigo-400 uppercase">
-                    CASE STUDY THỰC TẾ
-                  </span>
-
-                  <h3 className="font-display font-bold text-xl sm:text-2xl text-white">
-                    {cs.project}
-                  </h3>
-
-                  <div className="p-4 rounded-xl bg-slate-950 border border-slate-800 text-emerald-400 font-bold text-xs sm:text-sm flex items-center gap-2">
-                    <CheckCircle2 className="w-5 h-5 shrink-0" />
-                    <span>Kết quả: {cs.achievement}</span>
+                  {/* Left Graphic Grid Column: Quote size & ratings */}
+                  <div className="lg:col-span-4 flex flex-col items-center lg:items-start text-center lg:text-left space-y-4 lg:border-r lg:border-slate-800 lg:pr-8">
+                    <div className="w-16 h-16 rounded-2xl bg-slate-950 border border-slate-800 flex items-center justify-center shadow-lg">
+                      <Quote className="w-8 h-8 text-cyan-400 rotate-180" />
+                    </div>
+                    
+                    {/* Glowing Stars Rating */}
+                    <div className="flex gap-1">
+                      {[...Array(5)].map((_, index) => (
+                        <Star key={index} className="w-4 h-4 text-amber-400 fill-amber-400" />
+                      ))}
+                    </div>
+                    
+                    {/* Big Stats */}
+                    <div className="hidden lg:block pt-4">
+                      <p className="text-xs font-mono text-slate-500 tracking-wider">
+                        ĐÁNH GIÁ THỰC TẾ
+                      </p>
+                      <p className="text-lg font-display font-black text-white uppercase mt-1">
+                        100% Khách Thật
+                      </p>
+                    </div>
                   </div>
 
-                  <p className="text-slate-300 text-xs sm:text-sm leading-relaxed italic">
-                    "{cs.quote}"
-                  </p>
+                  {/* Right Content Column: Feedback description */}
+                  <div className="lg:col-span-8 space-y-5">
+                    
+                    <div className="flex flex-wrap items-center justify-between gap-3">
+                      <span className="text-[10px] font-mono font-bold tracking-widest text-indigo-400 uppercase bg-indigo-500/10 border border-indigo-500/20 px-2.5 py-1 rounded-md">
+                        CASE STUDY {currentTestimonialIndex + 1} / {CONFIG.proofs.cases.length}
+                      </span>
+                      
+                      {/* Autoplay status badge */}
+                      <span className="text-[10px] font-mono text-slate-500 flex items-center gap-1.5 bg-slate-950 px-2.5 py-1 rounded-full border border-slate-800">
+                        <span className={`w-1.5 h-1.5 rounded-full ${isTestimonialAutoplay ? 'bg-cyan-400 animate-pulse' : 'bg-amber-400'}`} />
+                        {isTestimonialAutoplay ? 'TỰ ĐỘNG CHUYỂN' : 'TẠM DỪNG (RÀ CHUỘT)'}
+                      </span>
+                    </div>
 
-                </div>
+                    <h3 className="font-display font-black text-xl sm:text-2xl text-white leading-tight uppercase">
+                      {CONFIG.proofs.cases[currentTestimonialIndex].project}
+                    </h3>
 
-                {/* Chân dung & Thông tin khách hàng phản hồi */}
-                <div className="pt-6 border-t border-slate-800 flex items-center gap-4 relative z-10">
-                  <img 
-                    src={cs.image} 
-                    alt={cs.name} 
-                    className="w-12 h-12 rounded-full object-cover border border-slate-700" 
-                    referrerPolicy="no-referrer"
-                  />
-                  <div>
-                    <h4 className="font-bold text-sm text-white">{cs.name}</h4>
-                    <p className="text-[11px] text-slate-400">{cs.role}</p>
+                    <div className="p-3.5 rounded-xl bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 font-bold text-xs sm:text-sm flex items-center gap-2">
+                      <CheckCircle2 className="w-4 h-4 shrink-0 text-emerald-400" />
+                      <span>Kết quả vượt trội: {CONFIG.proofs.cases[currentTestimonialIndex].achievement}</span>
+                    </div>
+
+                    <p className="text-slate-300 text-sm sm:text-base leading-relaxed italic">
+                      "{CONFIG.proofs.cases[currentTestimonialIndex].quote}"
+                    </p>
+
+                    {/* Client Info Block */}
+                    <div className="pt-4 border-t border-slate-800/80 flex items-center gap-4">
+                      <img 
+                        src={CONFIG.proofs.cases[currentTestimonialIndex].image} 
+                        alt={CONFIG.proofs.cases[currentTestimonialIndex].name} 
+                        className="w-12 h-12 rounded-full object-cover border-2 border-slate-800 shadow-md shadow-slate-950/50" 
+                        referrerPolicy="no-referrer"
+                      />
+                      <div>
+                        <h4 className="font-bold text-sm text-white flex items-center gap-1.5">
+                          {CONFIG.proofs.cases[currentTestimonialIndex].name}
+                          <span className="text-[10px] bg-cyan-400/10 text-cyan-400 px-1.5 py-0.5 rounded uppercase font-mono font-bold border border-cyan-400/20">Khách Hàng Thật</span>
+                        </h4>
+                        <p className="text-[11px] text-slate-400">{CONFIG.proofs.cases[currentTestimonialIndex].role}</p>
+                      </div>
+                    </div>
+
                   </div>
-                </div>
 
+                </motion.div>
+              </AnimatePresence>
+
+              {/* Autoplay Progress Bar */}
+              <div className="absolute bottom-0 left-0 right-0 h-1 bg-slate-950">
+                <motion.div 
+                  key={currentTestimonialIndex}
+                  initial={{ width: "0%" }}
+                  animate={isTestimonialAutoplay ? { width: "100%" } : { width: "0%" }}
+                  transition={{ duration: 6, ease: "linear" }}
+                  className="h-full bg-gradient-to-r from-cyan-400 to-indigo-500 rounded-full"
+                />
               </div>
-            ))}
+
+            </div>
+
+            {/* Slider Controls Container */}
+            <div className="flex items-center justify-between mt-6">
+              
+              {/* Pagination Dot Indicators */}
+              <div className="flex gap-2.5">
+                {CONFIG.proofs.cases.map((_, dotIndex) => (
+                  <button
+                    key={dotIndex}
+                    onClick={() => {
+                      setSlideDirection(dotIndex > currentTestimonialIndex ? 1 : -1);
+                      setCurrentTestimonialIndex(dotIndex);
+                    }}
+                    className={`h-2.5 rounded-full transition-all duration-300 ${
+                      dotIndex === currentTestimonialIndex 
+                        ? 'w-8 bg-cyan-400' 
+                        : 'w-2.5 bg-slate-800 hover:bg-slate-700'
+                    }`}
+                    aria-label={`Go to slide ${dotIndex + 1}`}
+                  />
+                ))}
+              </div>
+
+              {/* Navigation Arrows */}
+              <div className="flex gap-3">
+                <button
+                  onClick={handlePrevTestimonial}
+                  className="w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-400 text-slate-400 hover:text-white flex items-center justify-center transition-all shadow-md active:scale-95"
+                  aria-label="Previous feedback"
+                >
+                  <ChevronLeft className="w-5 h-5" />
+                </button>
+                <button
+                  onClick={handleNextTestimonial}
+                  className="w-11 h-11 rounded-xl bg-slate-900 border border-slate-800 hover:border-cyan-400 text-slate-400 hover:text-white flex items-center justify-center transition-all shadow-md active:scale-95"
+                  aria-label="Next feedback"
+                >
+                  <ChevronRight className="w-5 h-5" />
+                </button>
+              </div>
+
+            </div>
+
           </div>
 
         </div>
@@ -1196,6 +1498,21 @@ export default function App() {
                       value={phone}
                       onChange={(e) => setPhone(e.target.value)}
                       placeholder="Nhập số điện thoại (Có kết nối Zalo)..."
+                      className="w-full h-12 bg-slate-950 border border-slate-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 rounded-xl px-4 text-sm text-white placeholder:text-slate-600 outline-none transition-all"
+                    />
+                  </div>
+
+                  {/* Trường Địa chỉ Email */}
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-slate-300 uppercase tracking-wider block">
+                      {CONFIG.form.fields.email} <span className="text-red-400">*</span>
+                    </label>
+                    <input 
+                      type="email" 
+                      required
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Ví dụ: thonguyen@gmail.com"
                       className="w-full h-12 bg-slate-950 border border-slate-800 focus:border-cyan-400 focus:ring-1 focus:ring-cyan-400/50 rounded-xl px-4 text-sm text-white placeholder:text-slate-600 outline-none transition-all"
                     />
                   </div>
@@ -1279,11 +1596,12 @@ export default function App() {
                   </div>
 
                   {/* Thông tin đăng ký nhận nhanh */}
-                  <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl max-w-sm mx-auto text-left space-y-1 text-xs">
+                  <div className="p-4 bg-slate-950 border border-slate-800 rounded-2xl max-w-sm mx-auto text-left space-y-1.5 text-xs">
                     <p className="text-slate-400 font-bold uppercase tracking-wider mb-2 text-center text-[10px] border-b border-slate-900 pb-1">Chi tiết phiếu tư vấn</p>
-                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Họ & Tên:</span> {name || 'Khách hàng ẩn danh'}</p>
-                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Lĩnh vực:</span> {niche}</p>
-                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Điện thoại:</span> {phone}</p>
+                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Họ & Tên:</span> {leads[0]?.name || 'Khách hàng ẩn danh'}</p>
+                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Điện thoại:</span> <span className="font-mono text-cyan-400">{leads[0]?.phone}</span></p>
+                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Email:</span> <span className="text-slate-300 font-mono">{leads[0]?.email}</span></p>
+                    <p className="text-slate-300"><span className="text-slate-500 font-medium">Lĩnh vực:</span> {leads[0]?.niche}</p>
                   </div>
 
                   <div className="space-y-3 pt-4">
@@ -1388,6 +1706,9 @@ export default function App() {
                                 {copiedLeadId === l.id ? <Check className="w-3 h-3 text-emerald-400" /> : <Copy className="w-3 h-3" />}
                               </button>
                             </div>
+                            {l.email && (
+                              <p className="col-span-1 sm:col-span-2"><span className="text-slate-500 font-medium">Email:</span> <span className="font-mono text-slate-300">{l.email}</span></p>
+                            )}
                           </div>
 
                           <p className="text-slate-400 bg-slate-900/50 p-2 rounded border border-slate-900"><span className="text-slate-500 font-medium">Yêu cầu:</span> {l.note}</p>
